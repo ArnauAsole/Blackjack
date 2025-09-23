@@ -4,7 +4,6 @@ import com.example.blackjack.domain.game.Game;
 import com.example.blackjack.domain.game.GameStatus;
 import com.example.blackjack.domain.player.Player;
 import com.example.blackjack.dto.request.CreateGameRequest;
-import com.example.blackjack.service.BlackjackEngine;
 import com.example.blackjack.mapper.GameMapper;
 import com.example.blackjack.repo.GameRepository;
 import com.example.blackjack.repo.PlayerRepository;
@@ -17,7 +16,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,40 +24,46 @@ public class GameService {
     private final GameRepository games;
     private final PlayerRepository players;
 
-    /** Crea una nova partida a partir del DTO (mapper + jugador a MySQL) */
+    /** Crea partida + jugador (MySQL) */
     public Mono<Game> createGame(CreateGameRequest req) {
-        UUID playerId = UUID.randomUUID();
+        String name = req.playerName() == null ? "" : req.playerName().trim();
+        if (name.isEmpty()) {
+            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre del jugador es obligatorio"));
+        }
 
         Player player = Player.builder()
-
-                .name(req.playerName())
+                .name(name)
                 .wins(0)
                 .losses(0)
-                .createdAt(Instant.now())
+                .createdAt(Instant.now())   // o dejar que MySQL ponga el DEFAULT
                 .build();
 
-        Game game = GameMapper.toNewGame(req, playerId);
-
-        // Guardem jugador (MySQL) i partida (Mongo) de forma reactiva
-        return players.save(player).then(games.save(game));
+        // 1) Guardar jugador -> MySQL genera id (Long)
+        return players.save(player)
+                // 2) Con ese id Long, crear y guardar la partida en Mongo
+                .flatMap(savedPlayer -> {
+                    Game game = GameMapper.toNewGame(req, savedPlayer.getId()); // <- Long
+                    return games.save(game);
+                });
     }
 
-    /** Obtenir partida per id */
+    /** Obtener partida por id (Mongo) */
     public Mono<Game> get(String id) {
         return games.findById(id)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Game not found")));
     }
 
-    /** Esborrar partida */
+    /** Borrar partida */
     public Mono<Void> delete(String id) {
         return games.deleteById(id);
     }
 
-    /** Fer jugada: HIT o STAND */
+    /** Jugar: HIT o STAND */
     public Mono<Game> play(String id, String action) {
         return get(id).flatMap(g -> {
-            if (g.getStatus() != GameStatus.IN_PROGRESS)
+            if (g.getStatus() != GameStatus.IN_PROGRESS) {
                 return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Game ended"));
+            }
 
             List<com.example.blackjack.domain.game.Card> deck = g.getDeck();
 
@@ -74,7 +78,6 @@ public class GameService {
                     return games.save(g);
                 }
                 case "STAND" -> {
-                    // Dealer roba fins a 18 o més
                     BlackjackEngine.dealerPlay(deck, g.getDealerHand());
                     GameStatus st = BlackjackEngine.decide(g.getPlayerHand(), g.getDealerHand());
                     g.setStatus(st);
@@ -88,11 +91,11 @@ public class GameService {
         });
     }
 
-    /** Actualitza rànquing i desa partida */
+    /** Actualiza ranking y guarda partida */
     private Mono<Game> endAndUpdateRanking(Game g, boolean playerWin) {
         g.setUpdatedAt(Instant.now());
 
-        return players.findById(g.getPlayerId())
+        return players.findById(g.getPlayerId())  // <-- Long
                 .switchIfEmpty(Mono.just(Player.builder()
                         .id(g.getPlayerId())
                         .name(g.getPlayerName())
@@ -108,7 +111,7 @@ public class GameService {
                 .then(games.save(g));
     }
 
-    /** Rànquing de jugadors (MySQL) */
+    /** Ranking de jugadores (MySQL) */
     public Flux<Player> ranking() {
         return players.findAllByOrderByWinsDescLossesAsc();
     }
