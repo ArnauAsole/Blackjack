@@ -6,8 +6,6 @@ spring:
     url: r2dbc:mysql://localhost:3310/blackjack
     username: user
     password: user_pass
-    initialization:
-      enabled: true
 
   data:
     mongodb:
@@ -26,3 +24,4 @@ logging:
   level:
     io.asyncer.r2dbc.mysql: DEBUG
     org.springframework.r2dbc: DEBUG
+    org.springframework.r2dbc.connection.init: DEBUG

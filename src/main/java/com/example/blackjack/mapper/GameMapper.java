@@ -1,25 +1,24 @@
+// src/main/java/com/example/blackjack/mapper/GameMapper.java
 package com.example.blackjack.mapper;
 
-import com.example.blackjack.domain.game.*;
+import com.example.blackjack.domain.game.Card;
+import com.example.blackjack.domain.game.Game;
+import com.example.blackjack.domain.game.GameStatus;
 import com.example.blackjack.dto.request.CreateGameRequest;
 import com.example.blackjack.dto.response.GameResponse;
+import com.example.blackjack.service.BlackjackEngine;
 
 import java.time.Instant;
-import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class GameMapper {
+public final class GameMapper {
 
-    private static final SecureRandom RND = new SecureRandom();
-
-    public static List<Card> newShuffledDeck() {
-        List<Card> d = new ArrayList<>();
-        for (Suit s : Suit.values()) for (Rank r : Rank.values()) d.add(new Card(s, r));
-        Collections.shuffle(d, RND);
-        return d;
+    private GameMapper() {
     }
 
     /**
+<<<<<<< HEAD
      * Calcula la puntuació tenint l'As com 1 o 11 segons convingui
      */
     public static int score(List<Card> hand) {
@@ -45,29 +44,50 @@ public class GameMapper {
         ph.add(deck.remove(0));
         dh.add(deck.remove(0));
         dh.add(deck.remove(0));
+=======
+     * Crea un Game inicial: baraja, reparte 2+2 y marca IN_PROGRESS.
+     */
+    public static Game toNewGame(CreateGameRequest req, Long playerId) {
+        List<Card> deck = new ArrayList<>(BlackjackEngine.newShuffledDeck());
+
+        List<Card> player = new ArrayList<>();
+        List<Card> dealer = new ArrayList<>();
+
+        // repartir 2 + 2
+        player.add(deck.remove(0));
+        dealer.add(deck.remove(0));
+        player.add(deck.remove(0));
+        dealer.add(deck.remove(0));
+>>>>>>> ad32b6c (Changes in application.yml using org.springframework.r2dbc.connection.init: DEBUG)
 
         return Game.builder()
                 .playerId(playerId)
                 .playerName(req.playerName())
                 .deck(deck)
-                .playerHand(ph)
-                .dealerHand(dh)
+                .playerHand(player)
+                .dealerHand(dealer)
                 .status(GameStatus.IN_PROGRESS)
-                .bet(req.bet() == null ? 0 : req.bet())
+                .bet(req.bet() == null ? 0 : Math.max(0, req.bet()))
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
     }
 
     /**
+<<<<<<< HEAD
      * Converteix el model Game a la resposta pública GameResponse
+=======
+     * Game -> GameResponse calculando scores con el motor.
+>>>>>>> ad32b6c (Changes in application.yml using org.springframework.r2dbc.connection.init: DEBUG)
      */
     public static GameResponse toResponse(Game g) {
+        int pScore = BlackjackEngine.score(g.getPlayerHand());
+        int dScore = BlackjackEngine.score(g.getDealerHand());
         return new GameResponse(
                 g.getId(),
                 g.getPlayerName(),
-                score(g.getPlayerHand()),
-                score(g.getDealerHand()),
+                pScore,
+                dScore,
                 g.getPlayerHand(),
                 g.getDealerHand(),
                 g.getStatus(),
