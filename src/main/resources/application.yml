@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: blackjack
+
+  r2dbc:
+    url: r2dbc:mysql://localhost:3310/blackjack
+    username: user
+    password: user_pass
+    initialization:
+      enabled: true
+
+  data:
+    mongodb:
+      uri: mongodb://root:root@localhost:27017/blackjack?authSource=admin
+
+server:
+  port: 8081
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    io.asyncer.r2dbc.mysql: DEBUG
+    org.springframework.r2dbc: DEBUG
