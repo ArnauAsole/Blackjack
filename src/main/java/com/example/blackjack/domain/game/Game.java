@@ -8,7 +8,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Document("game")
 public class Game {
     @Id

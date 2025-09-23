@@ -17,18 +17,25 @@ public class BlackjackEngine {
 
     // As val 1 o 11 segons convingui
     public static int score(List<Card> hand) {
-        int total = 0; int aces = 0;
-        for (Card c : hand) { total += c.rank().value; if (c.rank()==Rank.ACE) aces++; }
-        while (total > 21 && aces > 0) { total -= 10; aces--; } // baixa ACE d'11 a 1
+        int total = 0;
+        int aces = 0;
+        for (Card c : hand) {
+            total += c.rank().value;
+            if (c.rank() == Rank.ACE) aces++;
+        }
+        while (total > 21 && aces > 0) {
+            total -= 10;
+            aces--;
+        } // baixa ACE d'11 a 1
         return total;
     }
 
     public static GameStatus decide(List<Card> player, List<Card> dealer) {
         int ps = score(player), ds = score(dealer);
-        if (ps>21) return GameStatus.PLAYER_BUST;
-        if (ds>21) return GameStatus.DEALER_BUST;
-        if (ps>ds) return GameStatus.PLAYER_WIN;
-        if (ps<ds) return GameStatus.DEALER_WIN;
+        if (ps > 21) return GameStatus.PLAYER_BUST;
+        if (ds > 21) return GameStatus.DEALER_BUST;
+        if (ps > ds) return GameStatus.PLAYER_WIN;
+        if (ps < ds) return GameStatus.DEALER_WIN;
         return GameStatus.PUSH;
     }
 

@@ -27,13 +27,16 @@ public class PlayerService {
         p.setName(clean);
         p.setWins(0);
         p.setLosses(0);
-        p.setCreatedAt(Instant.now()); // o dejar que MySQL ponga el default
+        p.setCreatedAt(Instant.now());
 
-        // evita duplicados por nombre
+        // Evita duplicado y, tras guardar, RELEER para devolver el id y el nombre correctos
         return players.existsByName(clean)
-                .flatMap(exists -> exists
-                        ? Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "Nombre ya en uso"))
-                        : players.save(p)); // id = null -> INSERT
+                .flatMap(exists -> {
+                    if (exists) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "Nombre ya en uso"));
+                    }
+                    return players.save(p).then(players.findByName(clean));
+                });
     }
 
     public Mono<Player> rename(Long id, String newName) {
@@ -45,21 +48,22 @@ public class PlayerService {
         return players.findById(id)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Jugador no encontrado")))
                 .flatMap(player -> {
-                    if (clean.equals(player.getName())) {
-                        return Mono.just(player); // nada que cambiar
+                    if (clean.equalsIgnoreCase(player.getName())) {
+                        // Nada que cambiar
+                        return Mono.just(player);
                     }
+                    // ¿ya existe alguien con ese nombre?
                     return players.findByName(clean)
                             .flatMap(existing -> {
-                                // si el nombre existe y es de otro jugador -> conflicto
                                 if (existing != null && !existing.getId().equals(id)) {
                                     return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "Nombre ya en uso"));
                                 }
                                 player.setName(clean);
-                                return players.save(player); // UPDATE
+                                return players.save(player).then(players.findById(id));
                             })
                             .switchIfEmpty(Mono.defer(() -> {
                                 player.setName(clean);
-                                return players.save(player); // nombre libre
+                                return players.save(player).then(players.findById(id));
                             }));
                 });
     }

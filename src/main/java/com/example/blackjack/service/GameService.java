@@ -24,7 +24,9 @@ public class GameService {
     private final GameRepository games;
     private final PlayerRepository players;
 
-    /** Crea partida + jugador (MySQL) */
+    /**
+     * Crea partida + jugador (MySQL)
+     */
     public Mono<Game> createGame(CreateGameRequest req) {
         String name = req.playerName() == null ? "" : req.playerName().trim();
         if (name.isEmpty()) {
@@ -47,18 +49,24 @@ public class GameService {
                 });
     }
 
-    /** Obtener partida por id (Mongo) */
+    /**
+     * Obtener partida por id (Mongo)
+     */
     public Mono<Game> get(String id) {
         return games.findById(id)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Game not found")));
     }
 
-    /** Borrar partida */
+    /**
+     * Borrar partida
+     */
     public Mono<Void> delete(String id) {
         return games.deleteById(id);
     }
 
-    /** Jugar: HIT o STAND */
+    /**
+     * Jugar: HIT o STAND
+     */
     public Mono<Game> play(String id, String action) {
         return get(id).flatMap(g -> {
             if (g.getStatus() != GameStatus.IN_PROGRESS) {
@@ -91,7 +99,9 @@ public class GameService {
         });
     }
 
-    /** Actualiza ranking y guarda partida */
+    /**
+     * Actualiza ranking y guarda partida
+     */
     private Mono<Game> endAndUpdateRanking(Game g, boolean playerWin) {
         g.setUpdatedAt(Instant.now());
 
@@ -111,7 +121,9 @@ public class GameService {
                 .then(games.save(g));
     }
 
-    /** Ranking de jugadores (MySQL) */
+    /**
+     * Ranking de jugadores (MySQL)
+     */
     public Flux<Player> ranking() {
         return players.findAllByOrderByWinsDescLossesAsc();
     }

@@ -18,7 +18,9 @@ public class GameController {
 
     private final GameService gameService;
 
-    /** Crear partida */
+    /**
+     * Crear partida
+     */
     @PostMapping("/new")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<GameResponse> newGame(@Valid @RequestBody CreateGameRequest req) {
@@ -26,14 +28,18 @@ public class GameController {
                 .map(GameMapper::toResponse);
     }
 
-    /** Obtenir detalls d’una partida */
+    /**
+     * Obtenir detalls d’una partida
+     */
     @GetMapping("/{id}")
     public Mono<GameResponse> getGame(@PathVariable String id) {
         return gameService.get(id)
                 .map(GameMapper::toResponse);
     }
 
-    /** Fer jugada (HIT o STAND) */
+    /**
+     * Fer jugada (HIT o STAND)
+     */
     @PostMapping("/{id}/play")
     public Mono<GameResponse> play(@PathVariable String id,
                                    @Valid @RequestBody PlayRequest req) {
@@ -41,7 +47,9 @@ public class GameController {
                 .map(GameMapper::toResponse);
     }
 
-    /** Eliminar partida */
+    /**
+     * Eliminar partida
+     */
     @DeleteMapping("/{id}/delete")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> delete(@PathVariable String id) {
