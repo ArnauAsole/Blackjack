@@ -28,7 +28,7 @@ public class GameMapper {
     }
 
     /** Crea un Game inicial a partir del request + playerId */
-    public static Game toNewGame(CreateGameRequest req, UUID playerId) {
+    public static Game toNewGame(CreateGameRequest req, Long playerId) {
         List<Card> deck = newShuffledDeck();
         List<Card> ph = new ArrayList<>(), dh = new ArrayList<>();
         ph.add(deck.remove(0)); ph.add(deck.remove(0));

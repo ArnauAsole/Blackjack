@@ -1,6 +1,5 @@
 package com.example.blackjack.controller;
 
-import com.example.blackjack.domain.player.Player;
 import com.example.blackjack.dto.request.CreatePlayerRequest;
 import com.example.blackjack.dto.request.RenamePlayerRequest;
 import com.example.blackjack.dto.response.PlayerResponse;
@@ -14,27 +13,31 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
-@RestController @RequiredArgsConstructor
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/player")
 public class PlayerController {
+
     private final PlayerService service;
+    private final PlayerMapper mapper;
 
     @Operation(summary = "Crear un nuevo jugador")
-    @PostMapping("/player/new")
+    @PostMapping("/new")
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<PlayerResponse> create(@Valid @RequestBody CreatePlayerRequest req) {
-        return service.create(req.name()).map(PlayerMapper::toResponse);
+        return service.create(req.name()).map(mapper::toResponse);
     }
 
-    @Operation(summary = "Canviar nom del jugador")
-    @PutMapping("/player/{playerId}")
-    public Mono<Player> rename(@PathVariable UUID playerId, @Valid @RequestBody RenamePlayerRequest req){
-        return service.rename(playerId, req.name());
+    @Operation(summary = "Cambiar nombre del jugador")
+    @PutMapping("/{playerId}")
+    public Mono<PlayerResponse> rename(@PathVariable Long playerId,
+                                       @Valid @RequestBody RenamePlayerRequest req) {
+        return service.rename(playerId, req.name()).map(mapper::toResponse);
     }
 
-    @GetMapping("/player/list")
-    public Flux<Player> listAll()  {
-        return service.listAll();
+    @Operation(summary = "Listado de jugadores")
+    @GetMapping("/list")
+    public Flux<PlayerResponse> listAll() {
+        return service.listAll().map(mapper::toResponse);
     }
 }

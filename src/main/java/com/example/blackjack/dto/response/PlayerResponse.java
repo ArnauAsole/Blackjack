@@ -5,4 +5,4 @@ public record PlayerResponse(
         String name,
         int wins,
         int losses
-) { }
+) {}

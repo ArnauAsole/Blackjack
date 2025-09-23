@@ -14,7 +14,7 @@ public class Game {
     @Id
     private String id;
 
-    private UUID playerId;
+    private Long playerId;
     private String playerName;
 
     private List<Card> deck;
