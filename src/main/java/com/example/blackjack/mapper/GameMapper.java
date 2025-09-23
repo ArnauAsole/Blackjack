@@ -18,33 +18,6 @@ public final class GameMapper {
     }
 
     /**
-<<<<<<< HEAD
-     * Calcula la puntuació tenint l'As com 1 o 11 segons convingui
-     */
-    public static int score(List<Card> hand) {
-        int total = 0, aces = 0;
-        for (Card c : hand) {
-            total += c.rank().value;
-            if (c.rank() == Rank.ACE) aces++;
-        }
-        while (total > 21 && aces > 0) {
-            total -= 10;
-            aces--;
-        }
-        return total;
-    }
-
-    /**
-     * Crea un Game inicial a partir del request + playerId
-     */
-    public static Game toNewGame(CreateGameRequest req, Long playerId) {
-        List<Card> deck = newShuffledDeck();
-        List<Card> ph = new ArrayList<>(), dh = new ArrayList<>();
-        ph.add(deck.remove(0));
-        ph.add(deck.remove(0));
-        dh.add(deck.remove(0));
-        dh.add(deck.remove(0));
-=======
      * Crea un Game inicial: baraja, reparte 2+2 y marca IN_PROGRESS.
      */
     public static Game toNewGame(CreateGameRequest req, Long playerId) {
@@ -53,12 +26,11 @@ public final class GameMapper {
         List<Card> player = new ArrayList<>();
         List<Card> dealer = new ArrayList<>();
 
-        // repartir 2 + 2
+        // reparte 2 + 2 del tope del mazo
         player.add(deck.remove(0));
         dealer.add(deck.remove(0));
         player.add(deck.remove(0));
         dealer.add(deck.remove(0));
->>>>>>> ad32b6c (Changes in application.yml using org.springframework.r2dbc.connection.init: DEBUG)
 
         return Game.builder()
                 .playerId(playerId)
@@ -74,11 +46,7 @@ public final class GameMapper {
     }
 
     /**
-<<<<<<< HEAD
-     * Converteix el model Game a la resposta pública GameResponse
-=======
-     * Game -> GameResponse calculando scores con el motor.
->>>>>>> ad32b6c (Changes in application.yml using org.springframework.r2dbc.connection.init: DEBUG)
+     * Mapea Game -> GameResponse recalculando puntuaciones con el motor.
      */
     public static GameResponse toResponse(Game g) {
         int pScore = BlackjackEngine.score(g.getPlayerHand());

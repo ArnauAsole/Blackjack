@@ -1,3 +1,2 @@
 package com.example.blackjack.domain.game;
-
-public enum Suit {CLUBS, DIAMONDS, HEARTS, SPADES}
+public enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES }

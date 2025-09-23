@@ -10,23 +10,16 @@ import java.time.Instant;
 import java.util.List;
 
 @Data
-<<<<<<< HEAD
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Document("game")
-=======
 @Builder
 @Document("games")
->>>>>>> ad32b6c (Changes in application.yml using org.springframework.r2dbc.connection.init: DEBUG)
 public class Game {
 
     @Id
     private String id;
 
     // relación con jugador (MySQL)
-    private Long playerId;      // id del Player en MySQL
-    private String playerName;  // redundante para mostrar en responses
+    private Long playerId;      // lo extraemos del Player real
+    private String playerName;  // para mostrar en el response
 
     // mazo y manos
     private List<Card> deck;

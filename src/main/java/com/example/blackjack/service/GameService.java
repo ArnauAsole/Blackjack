@@ -26,11 +26,7 @@ public class GameService {
     private final PlayerRepository players; // MySQL (R2DBC)
 
     /**
-<<<<<<< HEAD
-     * Crea partida + jugador (MySQL)
-=======
      * Crea partida validando que el jugador existe.
->>>>>>> ad32b6c (Changes in application.yml using org.springframework.r2dbc.connection.init: DEBUG)
      */
     public Mono<Game> createGame(CreateGameRequest req) {
         String clean = req.playerName() == null ? "" : req.playerName().trim();
@@ -44,7 +40,7 @@ public class GameService {
     }
 
     /**
-     * Obtener partida por id.
+     * Detall d'una partida.
      */
     public Mono<Game> get(String id) {
         return games.findById(id)
@@ -52,7 +48,7 @@ public class GameService {
     }
 
     /**
-     * Realiza jugada: action = HIT o STAND.
+     * Realitza una jugada: action = HIT o STAND.
      */
     public Mono<Game> play(String id, String actionRaw) {
         final String action = actionRaw == null ? "" : actionRaw.trim().toUpperCase();
@@ -71,36 +67,13 @@ public class GameService {
     }
 
     /**
-<<<<<<< HEAD
-     * Obtener partida por id (Mongo)
-     */
-    public Mono<Game> get(String id) {
-        return games.findById(id)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Game not found")));
-    }
-
-    /**
-     * Borrar partida
-=======
-     * Eliminar partida (idempotente).
->>>>>>> ad32b6c (Changes in application.yml using org.springframework.r2dbc.connection.init: DEBUG)
+     * Esborra una partida (idempotent).
      */
     public Mono<Void> delete(String id) {
         return games.deleteById(id);
     }
 
-<<<<<<< HEAD
-    /**
-     * Jugar: HIT o STAND
-     */
-    public Mono<Game> play(String id, String action) {
-        return get(id).flatMap(g -> {
-            if (g.getStatus() != GameStatus.IN_PROGRESS) {
-                return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Game ended"));
-            }
-=======
     // ----------------- Helpers de jugada -----------------
->>>>>>> ad32b6c (Changes in application.yml using org.springframework.r2dbc.connection.init: DEBUG)
 
     private Mono<Game> hit(Game g) {
         if (g.getStatus() != GameStatus.IN_PROGRESS) {
@@ -124,12 +97,6 @@ public class GameService {
         return games.save(g);
     }
 
-<<<<<<< HEAD
-    /**
-     * Actualiza ranking y guarda partida
-     */
-    private Mono<Game> endAndUpdateRanking(Game g, boolean playerWin) {
-=======
     private Mono<Game> stand(Game g) {
         if (g.getStatus() != GameStatus.IN_PROGRESS) {
             return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "La partida ja està tancada"));
@@ -137,17 +104,23 @@ public class GameService {
 
         // turno del dealer
         BlackjackEngine.dealerPlay(g.getDeck(), g.getDealerHand());
+        int p = BlackjackEngine.score(g.getPlayerHand());
+        int d = BlackjackEngine.score(g.getDealerHand());
 
-        GameStatus finalStatus = BlackjackEngine.decide(g.getPlayerHand(), g.getDealerHand());
+        GameStatus finalStatus;
+        if (d > 21) finalStatus = GameStatus.DEALER_BUST;       // gana jugador
+        else if (p > d) finalStatus = GameStatus.PLAYER_WIN;
+        else if (p < d) finalStatus = GameStatus.DEALER_WIN;
+        else finalStatus = GameStatus.PUSH;
+
         g.setStatus(finalStatus);
->>>>>>> ad32b6c (Changes in application.yml using org.springframework.r2dbc.connection.init: DEBUG)
         g.setUpdatedAt(Instant.now());
 
+        boolean playerWins = (finalStatus == GameStatus.DEALER_BUST || finalStatus == GameStatus.PLAYER_WIN);
         if (finalStatus == GameStatus.PUSH) {
             // empate: no tocar ranking
             return games.save(g);
         }
-        boolean playerWins = (finalStatus == GameStatus.DEALER_BUST || finalStatus == GameStatus.PLAYER_WIN);
         return endAndUpdateRanking(g, playerWins);
     }
 
@@ -164,14 +137,4 @@ public class GameService {
                 .onErrorResume(ex -> Mono.empty()) // no bloquear si falla ranking
                 .then(games.save(g));
     }
-<<<<<<< HEAD
-
-    /**
-     * Ranking de jugadores (MySQL)
-     */
-    public Flux<Player> ranking() {
-        return players.findAllByOrderByWinsDescLossesAsc();
-    }
-=======
->>>>>>> ad32b6c (Changes in application.yml using org.springframework.r2dbc.connection.init: DEBUG)
 }

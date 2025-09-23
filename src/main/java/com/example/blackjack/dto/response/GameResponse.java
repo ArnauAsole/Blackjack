@@ -16,5 +16,4 @@ public record GameResponse(
         GameStatus status,
         Integer bet,
         Instant updatedAt
-) {
-}
+) { }

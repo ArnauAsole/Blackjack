@@ -11,12 +11,12 @@ import reactor.core.publisher.Mono;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
-    public Mono<ProblemDetail> handle(ResponseStatusException ex) {
+    public Mono<ProblemDetail> handle(ResponseStatusException ex){
         return Mono.just(ProblemDetail.forStatusAndDetail(ex.getStatusCode(), ex.getReason()));
     }
 
     @ExceptionHandler(Throwable.class)
-    public Mono<ProblemDetail> handle(Throwable ex) {
+    public Mono<ProblemDetail> handle(Throwable ex){
         return Mono.just(ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage()));
     }
 }
