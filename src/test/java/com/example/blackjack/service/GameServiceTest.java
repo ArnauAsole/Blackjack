@@ -1,5 +1,6 @@
 package com.example.blackjack.service;
 
+import com.example.blackjack.domain.player.Player;
 import com.example.blackjack.domain.game.Game;
 import com.example.blackjack.dto.request.CreateGameRequest;
 import com.example.blackjack.repo.GameRepository;
@@ -9,37 +10,40 @@ import org.mockito.Mockito;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.UUID;
-
 class GameServiceTest {
 
     @Test
     void createGame_ok() {
-        // mocks dels repos
+        // Repos mockeados
         GameRepository gRepo = Mockito.mock(GameRepository.class);
         PlayerRepository pRepo = Mockito.mock(PlayerRepository.class);
 
-        // quan es guardi un player → retorna’l tal qual
-        Mockito.when(pRepo.save(Mockito.any()))
+        // Al guardar un Player, simulamos que MySQL le asigna un ID autoincremental
+        Mockito.when(pRepo.save(Mockito.any(Player.class)))
+                .thenAnswer(inv -> {
+                    Player p = inv.getArgument(0, Player.class);
+                    p.setId(1L);                 // simulamos AUTO_INCREMENT
+                    return Mono.just(p);
+                });
+
+        // Al guardar un Game, devolvemos el mismo objeto
+        Mockito.when(gRepo.save(Mockito.any(Game.class)))
                 .thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
-        // quan es guardi un game → retorna’l tal qual
-        Mockito.when(gRepo.save(Mockito.any()))
-                .thenAnswer(inv -> Mono.just(inv.getArgument(0)));
-
-        // servei amb els repos mockejats
+        // Servicio bajo prueba
         GameService svc = new GameService(gRepo, pRepo);
 
-        // 👉 creem el DTO (record en Java 17+/21)
+        // DTO de entrada
         CreateGameRequest req = new CreateGameRequest("Alice", 100);
 
+        // Verificación
         StepVerifier.create(svc.createGame(req))
-                .expectNextMatches(g -> {
-                    // comprovem que el joc té el nom del jugador correcte
-                    return g.getPlayerName().equals("Alice")
-                            && g.getBet() == 100
-                            && g.getPlayerId() instanceof UUID;
-                })
+                .expectNextMatches(g ->
+                        g.getPlayerName().equals("Alice")
+                                && g.getBet() == 100
+                                && g.getPlayerId() != null
+                                && g.getPlayerId().equals(1L)      // ahora es Long, no UUID
+                )
                 .verifyComplete();
     }
 }

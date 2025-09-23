@@ -19,15 +19,17 @@ import java.util.UUID;
 @WebFluxTest(controllers = GameController.class)
 class GameControllerTest {
 
-    @Autowired WebTestClient web;
+    @Autowired
+    WebTestClient web;
 
-    @MockBean GameService svc;
+    @MockBean
+    GameService svc;
 
     @Test
     void newGame_returns201() {
         Game game = Game.builder()
                 .id("game-1")
-                .playerId(UUID.randomUUID())
+                .playerId(1L)                            // <--- Long, no UUID
                 .playerName("Bob")
                 .deck(new ArrayList<>())
                 .playerHand(new ArrayList<>(List.of(new Card(Suit.HEARTS, Rank.SEVEN))))
