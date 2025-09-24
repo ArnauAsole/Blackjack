@@ -1,4 +1,3 @@
-// src/main/java/com/example/blackjack/mapper/GameMapper.java
 package com.example.blackjack.mapper;
 
 import com.example.blackjack.domain.game.Card;
@@ -26,7 +25,6 @@ public final class GameMapper {
         List<Card> player = new ArrayList<>();
         List<Card> dealer = new ArrayList<>();
 
-        // reparte 2 + 2 del tope del mazo
         player.add(deck.remove(0));
         dealer.add(deck.remove(0));
         player.add(deck.remove(0));

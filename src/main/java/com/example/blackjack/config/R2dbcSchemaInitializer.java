@@ -16,7 +16,7 @@ public class R2dbcSchemaInitializer {
         ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer();
         initializer.setConnectionFactory(connectionFactory);
 
-        // Ejecuta src/main/resources/schema.sql al arrancar
+
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator(
                 new ClassPathResource("schema.sql")
         );

@@ -17,22 +17,18 @@ public class Game {
     @Id
     private String id;
 
-    // relación con jugador (MySQL)
-    private Long playerId;      // lo extraemos del Player real
-    private String playerName;  // para mostrar en el response
 
-    // mazo y manos
+    private Long playerId;
+    private String playerName;
+
     private List<Card> deck;
     private List<Card> playerHand;
     private List<Card> dealerHand;
 
-    // estado de la partida
     private GameStatus status;
 
-    // apuesta (opcional)
     private Integer bet;
 
-    // auditoría
     private Instant createdAt;
     private Instant updatedAt;
 }

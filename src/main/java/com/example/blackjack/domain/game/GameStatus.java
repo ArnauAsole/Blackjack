@@ -2,10 +2,10 @@
 package com.example.blackjack.domain.game;
 
 public enum GameStatus {
-    IN_PROGRESS,   // partida abierta
-    PLAYER_BUST,   // jugador se pasa (>21)
-    DEALER_BUST,   // dealer se pasa (>21)
+    IN_PROGRESS,
+    PLAYER_BUST,
+    DEALER_BUST,
     PLAYER_WIN,
     DEALER_WIN,
-    PUSH           // empate
+    PUSH
 }

@@ -17,7 +17,7 @@ public class PlayerIdCallback {
             if (player.getCreatedAt() == null) {
                 player.setCreatedAt(Instant.now());
             }
-            // NO tocar player.setId(...)
+
             return Mono.just(player);
         };
     }

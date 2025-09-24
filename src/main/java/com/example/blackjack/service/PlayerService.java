@@ -30,7 +30,6 @@ public class PlayerService {
         p.setLosses(0);
         p.setCreatedAt(Instant.now());
 
-        // Primero comprobamos duplicado; si OK, guardamos y devolvemos el propio entity (R2DBC rellena el id)
         return players.existsByName(clean)
                 .flatMap(exists -> {
                     if (exists) {
@@ -38,7 +37,7 @@ public class PlayerService {
                     }
                     return players.save(p);
                 })
-                // por si hay condición de carrera con la UNIQUE del DB:
+
                 .onErrorMap(DataIntegrityViolationException.class,
                         ex -> new ResponseStatusException(HttpStatus.CONFLICT, "Nombre ya en uso", ex));
     }
@@ -56,7 +55,7 @@ public class PlayerService {
                         // Nada que cambiar
                         return Mono.just(player);
                     }
-                    // Comprueba si el nombre ya existe en otro jugador
+
                     return players.findByName(clean)
                             .flatMap(existing -> {
                                 if (existing != null && !existing.getId().equals(id)) {
@@ -70,7 +69,7 @@ public class PlayerService {
                                 return players.save(player);
                             }));
                 })
-                // por si el UNIQUE del DB salta igualmente:
+
                 .onErrorMap(DataIntegrityViolationException.class,
                         ex -> new ResponseStatusException(HttpStatus.CONFLICT, "Nombre ya en uso", ex));
     }

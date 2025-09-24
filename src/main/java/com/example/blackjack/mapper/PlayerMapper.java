@@ -1,4 +1,3 @@
-// src/main/java/com/example/blackjack/mapper/PlayerMapper.java
 package com.example.blackjack.mapper;
 
 import com.example.blackjack.domain.player.Player;

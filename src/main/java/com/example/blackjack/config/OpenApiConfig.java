@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfig {
     @Bean
     public OpenAPI api() {
-        return new OpenAPI().info(new Info()
-                .title("Blackjack API")
-                .version("v1"));
+        return new OpenAPI().info(new Info().title("Blackjack API").version("v1"));
     }
 }

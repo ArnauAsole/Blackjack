@@ -1,4 +1,3 @@
-// src/main/java/com/example/blackjack/service/GameService.java
 package com.example.blackjack.service;
 
 import com.example.blackjack.domain.game.Card;
@@ -25,9 +24,7 @@ public class GameService {
     private final GameRepository games;     // Mongo
     private final PlayerRepository players; // MySQL (R2DBC)
 
-    /**
-     * Crea partida validando que el jugador existe.
-     */
+
     public Mono<Game> createGame(CreateGameRequest req) {
         String clean = req.playerName() == null ? "" : req.playerName().trim();
         if (clean.isEmpty()) {
@@ -39,17 +36,13 @@ public class GameService {
                 .flatMap(p -> games.save(toNewGame(req, p.getId())));
     }
 
-    /**
-     * Detall d'una partida.
-     */
+
     public Mono<Game> get(String id) {
         return games.findById(id)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Partida no trobada")));
     }
 
-    /**
-     * Realitza una jugada: action = HIT o STAND.
-     */
+
     public Mono<Game> play(String id, String actionRaw) {
         final String action = actionRaw == null ? "" : actionRaw.trim().toUpperCase();
         if (action.isEmpty()) {
@@ -66,14 +59,11 @@ public class GameService {
                 });
     }
 
-    /**
-     * Esborra una partida (idempotent).
-     */
+
     public Mono<Void> delete(String id) {
         return games.deleteById(id);
     }
 
-    // ----------------- Helpers de jugada -----------------
 
     private Mono<Game> hit(Game g) {
         if (g.getStatus() != GameStatus.IN_PROGRESS) {
@@ -124,9 +114,7 @@ public class GameService {
         return endAndUpdateRanking(g, playerWins);
     }
 
-    /**
-     * Cierra la partida y actualiza ranking en MySQL.
-     */
+
     private Mono<Game> endAndUpdateRanking(Game g, boolean playerWins) {
         return players.findById(g.getPlayerId())
                 .flatMap(p -> {
